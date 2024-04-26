@@ -1,0 +1,87 @@
+buildscript {
+    ext.kotlin_version = '1.8.0'
+    ext.kotlin_coroutines_version = '1.6.4'
+    ext.daggerVersion = '2.46.1'
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$daggerVersion"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+    //Support @JvmDefault
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+        kotlinOptions {
+            freeCompilerArgs = ['-Xjvm-default=enable'] //enable or compatibility
+            jvmTarget = "17"
+        }
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.google.dagger.hilt.android'
+apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdk 34
+    // namespace 'com.packagename'
+
+    defaultConfig {
+        minSdk 34
+        targetSdk 34
+        versionName "14"
+        versionCode 34
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = [
+                    "src",
+            ]
+            res.srcDirs = [
+                    "res",
+            ]
+            manifest.srcFile "AndroidManifest.xml"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compileOnly files('system_libs/framework.jar')
+
+    implementation files('system_libs/SystemUISharedLib.jar')
+    implementation files('system_libs/SystemUI-statsd.jar')
+
+    implementation project(path: ':SystemUIAnimationLib')
+    implementation project(path: ':SystemUICustomizationLib')
+
+    implementation("com.google.dagger:hilt-android:$daggerVersion")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
+
+}
